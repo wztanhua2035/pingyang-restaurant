@@ -18,7 +18,7 @@
 node server.js          # 需要 Node.js 18+，无需 npm install
 # 浏览器打开 http://localhost:3000/wall.html ，再开 http://localhost:3000/s.html?g=1
 ```
-环境变量：`PORT`（默认 3000）、`GROUPS`（默认 10）、`TEACHER_PASSWORD`（不设则首次启动随机生成，保存在 `data/config.json`，并打印在日志里）。
+环境变量：`PORT`（默认 3000）、`GROUPS`（默认 10）、`TEACHER_PASSWORD`（默认不设，大屏免登录；设置后大屏打分/锁定/下一轮需要输入该密码）。
 
 ## 部署到腾讯云服务器
 1. **服务器上拉代码**（仓库是私有的，用「部署密钥」只读访问）：
@@ -34,7 +34,7 @@ node server.js          # 需要 Node.js 18+，无需 npm install
 4. 之后更新：`bash /opt/pingyang-restaurant/deploy/update.sh`（普通账号运行即可）
 
 ## 上课流程
-1. 课前打开大屏 `/wall.html` → 右上角「教师登录」输入密码 → 「二维码」把 10 个二维码投出来或打印。
+1. 课前打开大屏 `/wall.html`（无需登录）→ 「二维码」把 10 个二维码投出来或打印。
 2. 学生扫码进入本组 → 4 位同学轮流点餐 → 全部点完按「Place order」。
 3. 大屏实时出现订单与机器人评分；老师点星给每组「Fluent dialogue / Correct expression」打 1–3 星，平板上同步显示。
 4. 「锁定点单」可暂停所有平板；「下一轮」清空全部数据开始新一轮。

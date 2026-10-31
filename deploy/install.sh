@@ -66,6 +66,6 @@ fi
 echo
 echo "================ 完成 ================"
 echo "本机测试： curl http://127.0.0.1:$PORT/api/info"
-echo "教师密码： $(grep -o '"password":"[^"]*"' "$APP_DIR/data/config.json" | cut -d'"' -f4)   （也可用 journalctl -u pingyang 查看）"
+echo "教师操作：默认无需密码（大屏直接可用）；如需密码，在 systemd 服务里加 Environment=TEACHER_PASSWORD=你的密码"
 echo "大屏：     http://${DOMAIN:-服务器IP:$PORT}/wall.html"
 echo "更新代码： bash $APP_DIR/deploy/update.sh"

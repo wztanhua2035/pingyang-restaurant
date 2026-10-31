@@ -85,7 +85,7 @@
       <div class="row"><button class="tb" onclick="window.print()">🖨 打印</button><button class="tb pri" onclick="$('ovqr').classList.remove('show')">关闭</button></div></div>
   </div>
   <div class="ov" id="ovlogin">
-    <div class="box"><h2>🔑 教师登录</h2><div style="color:#7a6a55;font-size:14px">输入服务器启动时显示的教师密码，登录后才能打分、锁定、开始下一轮。</div>
+    <div class="box"><h2>🔑 教师登录</h2><div style="color:#7a6a55;font-size:14px">服务器设置了教师密码，登录后才能打分、锁定、开始下一轮。</div>
       <input id="pw" type="password" placeholder="教师密码" onkeydown="if(event.key==='Enter')doLogin()">
       <div class="row"><button class="tb" onclick="$('ovlogin').classList.remove('show')">取消</button><button class="tb pri" onclick="doLogin()">登录</button></div></div>
   </div>
@@ -97,7 +97,7 @@
 <script>
 const $=id=>document.getElementById(id);
 let S=null, pw=''; try{ pw=localStorage.getItem('py_pw')||''; }catch(e){}
-let authed=false; const popping={}, lastSeq={};
+let authed=true; const popping={}, lastSeq={};
 
 function fit(){ const s=Math.min(innerWidth/1280,innerHeight/720); $('stage').style.transform=`translate(-50%,-50%) scale(${s})`; }
 addEventListener('resize',fit); fit();
@@ -112,7 +112,8 @@ function render(){
   $('prog').textContent=`已下单 ${sub}/${n}`;
   $('lockpill').style.display=S.locked?'':'none';
   $('lockbtn').textContent=S.locked?'🔓 解锁点单':'🔒 锁定点单';
-  $('authbtn').textContent=authed?'✔ 已登录':'🔑 教师登录';
+  $('authbtn').style.display=authed?'none':'';
+  $('authbtn').textContent='🔑 教师登录';
   $('grid').style.gridTemplateColumns=`repeat(${n<=10?5:Math.ceil(n/4)},1fr)`;
   $('grid').style.gridTemplateRows=`repeat(${n<=10?2:4},1fr)`;
   $('grid').innerHTML=ids.map(g=>{
@@ -166,7 +167,7 @@ function showQR(){
     return `<div class="qr">${q.createSvgTag({cellSize:4,margin:0,scalable:true})}<b>第 ${i+1} 组</b><small>${u}</small></div>`; }).join('');
   $('ovqr').classList.add('show');
 }
-if(pw){ adm('check').then(ok=>{ if(ok){ authed=true; render(); } }); }
+adm('check').then(ok=>{ if(ok){ authed=true; render(); } });   // 服务器若设置了密码，这里会自动弹出登录框
 connect();
 </script>
 </body>

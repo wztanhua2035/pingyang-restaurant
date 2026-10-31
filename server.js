@@ -13,13 +13,8 @@ const PUBLIC = path.join(__dirname, 'public');
 const DATA = path.join(__dirname, 'data');
 fs.mkdirSync(DATA, { recursive: true });
 
-/* ---------- 教师密码：环境变量优先，否则首次启动随机生成并保存 ---------- */
-const CONF_FILE = path.join(DATA, 'config.json');
-let conf = {};
-try { conf = JSON.parse(fs.readFileSync(CONF_FILE, 'utf8')); } catch (e) {}
-if (process.env.TEACHER_PASSWORD) conf.password = process.env.TEACHER_PASSWORD;
-if (!conf.password) conf.password = String(crypto.randomInt(100000, 999999));
-fs.writeFileSync(CONF_FILE, JSON.stringify(conf));
+/* ---------- 教师密码：默认不需要；只有设置了环境变量 TEACHER_PASSWORD 才会启用 ---------- */
+const conf = { password: process.env.TEACHER_PASSWORD || '' };
 const sameStr = (a, b) => { const x = Buffer.from(String(a)), y = Buffer.from(String(b));
   return x.length === y.length && crypto.timingSafeEqual(x, y); };
 
@@ -144,7 +139,7 @@ const server = http.createServer((req, res) => {
 
   /* 教师操作：打分、锁定、下一轮 */
   if (req.method === 'POST' && p === '/api/admin') return readJson(req, res, b => {
-    if (!sameStr(b.pw || '', conf.password)) return json(res, 401, { error: 'bad password' });
+    if (conf.password && !sameStr(b.pw || '', conf.password)) return json(res, 401, { error: 'bad password' });
     switch (b.action) {
       case 'check': break;
       case 'rate': {
@@ -176,6 +171,6 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(' 端口：' + PORT + '   组数：' + GROUPS);
   console.log(' 大屏订单墙： /wall.html');
   console.log(' 学生端：     /s.html?g=1 … ' + GROUPS);
-  console.log(' 教师密码：' + conf.password + '   （保存在 data/config.json）');
+  console.log(conf.password ? ' 教师操作：需要密码（TEACHER_PASSWORD）' : ' 教师操作：无需密码（大屏页面直接可用）');
   console.log('==============================================');
 });
