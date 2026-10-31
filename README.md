@@ -41,3 +41,8 @@ node server.js          # 需要 Node.js 18+，无需 npm install
 
 ## 隐私
 只记录组号和菜品，不收集姓名等个人信息。状态保存在服务器 `data/state.json`（已在 `.gitignore` 中，不会上传 GitHub）。
+
+## 自动部署（可选）
+在服务器上运行一次：`cd /opt/pingyang-restaurant && sudo bash deploy/enable-autoupdate.sh`
+之后推送到 GitHub 的 `main` 分支，约 1 分钟内服务器自动拉取并重启（只在有新提交时才重启；`data/` 不受影响）。
+上课期间想冻结版本：`sudo systemctl stop pingyang-autoupdate.timer`；下课再 `start`。关闭：`sudo systemctl disable --now pingyang-autoupdate.timer`。
