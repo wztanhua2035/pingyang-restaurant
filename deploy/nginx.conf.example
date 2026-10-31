@@ -1,0 +1,18 @@
+# 平阳味道餐厅 · Nginx 反向代理（SSE 实时推送需要关闭缓冲）
+server {
+    listen 80;
+    server_name __DOMAIN__;
+
+    location / {
+        proxy_pass http://127.0.0.1:__PORT__;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Connection "";
+        proxy_buffering off;          # 关键：实时推送不能被缓冲
+        proxy_cache off;
+        proxy_read_timeout 3600s;     # 平板长连接
+    }
+}
+# 如需 HTTPS：在腾讯云「SSL 证书」申请免费证书，下载 Nginx 版本后，
+# 再加一个 listen 443 ssl 的 server 块（ssl_certificate / ssl_certificate_key），并把 80 端口跳转到 https。

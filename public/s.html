@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>平阳味道餐厅 · 学生点单</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+  html,body{width:100%;height:100%;overflow:hidden;background:#1f2a44;user-select:none;-webkit-user-select:none;
+    font-family:"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;}
+  #stage{position:absolute;left:50%;top:50%;width:1024px;height:768px;transform-origin:center;
+    background:#f5ecd8;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;padding:12px 16px 12px;}
+  .hide{display:none!important;}
+
+  /* 顶部 */
+  .top{display:flex;align-items:center;gap:12px;height:40px;flex:none;}
+  .gpill{background:#ff7a59;color:#fff;font-weight:900;font-size:19px;padding:5px 18px;border-radius:22px;}
+  .ttl{font-weight:900;font-size:18px;color:#3a2c1c;flex:1;}
+  .ttl small{font-weight:700;font-size:13px;color:#8a6a4a;margin-left:8px;}
+  .net{font-size:13px;font-weight:800;color:#2b7a3e;background:rgba(255,255,255,.8);padding:4px 11px;border-radius:14px;}
+  .net.off{color:#b3361f;background:#ffe3dc;}
+
+  /* 餐盘行 */
+  .plates{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;height:128px;flex:none;margin-top:6px;}
+  .pc{background:rgba(255,255,255,.75);border:3px solid transparent;border-radius:16px;padding:7px 8px;
+    display:flex;align-items:center;gap:8px;cursor:pointer;position:relative;}
+  .pc.active{border-color:#ff7a59;box-shadow:0 0 0 4px rgba(255,122,89,.22);background:#fff;}
+  .pc.isdone .circle{border-color:#7ccf8c;}
+  .circle{flex:none;width:98px;height:98px;border-radius:50%;border:4px solid #e6cfa9;
+    background:radial-gradient(circle at 35% 30%,#fffefe,#f1e2cc);display:flex;flex-wrap:wrap;
+    align-content:center;justify-content:center;gap:2px;padding:5px;}
+  .circle .empty{font-size:12px;color:#b9a787;text-align:center;line-height:1.3;padding:0 4px;align-self:center;}
+  .pitem{position:relative;width:28px;height:28px;}
+  .pitem .x{position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;background:#ff5a4d;
+    color:#fff;border:none;font-weight:900;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .pinfo{display:flex;flex-direction:column;gap:5px;min-width:0;}
+  .who{font-weight:900;font-size:16px;color:#4a3826;white-space:nowrap;}
+  .pcnt{font-size:12.5px;color:#8a6a4a;font-weight:700;}
+  .donebtn,.clrbtn{border:none;border-radius:14px;padding:5px 10px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;}
+  .donebtn{background:#bfe9c4;color:#1d6b2e;} .donebtn.on{background:#2faa4a;color:#fff;}
+  .clrbtn{background:#ffd9d2;color:#b3361f;}
+  .btnrow{display:flex;gap:5px;flex-wrap:wrap;}
+
+  /* 问句条 */
+  .qbar{flex:none;display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;margin-top:8px;
+    padding:5px 14px;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+  .qbar .q{font-weight:900;font-size:19px;color:#3a2c1c;}
+  .qbar .a{font-size:14px;color:#6a5d49;font-weight:700;}
+  .qbar .sp{flex:1;}
+  .spk{border:none;background:#ffe1b0;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:17px;}
+  .frames{display:flex;gap:6px;}
+  .frames span{font-size:12px;font-weight:800;border-radius:10px;padding:3px 9px;border:2px dashed #bbb;background:#fff;color:#444;}
+  .frames .f1{border-color:#4f9fd8;} .frames .f2{border-color:#54b878;} .frames .f3{border-color:#e081a6;}
+
+  /* 菜单 */
+  .menu{flex:1;min-height:0;display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:8px;}
+  .zone{background:rgba(255,255,255,.7);border-radius:14px;padding:6px 6px 6px;display:flex;flex-direction:column;gap:5px;min-height:0;}
+  .zone h4{font-size:14.5px;font-weight:900;color:#6a4a2a;text-align:center;line-height:1.1;margin:1px 0 1px;}
+  .dish{display:flex;align-items:center;gap:7px;background:#fff;border:1.5px solid #eadfc6;border-radius:14px;
+    padding:3px 7px 3px 4px;min-height:52px;cursor:pointer;box-shadow:0 1px 3px rgba(110,85,45,.12);}
+  .dish:active{transform:scale(.96);background:#fff6e6;border-color:#f0b27a;}
+  .dish .w{font-weight:800;font-size:16.5px;color:#4a3826;line-height:1.1;}
+  .badge{width:44px;height:44px;border-radius:50%;overflow:hidden;flex:none;border:2px solid #fff;
+    box-shadow:0 2px 4px rgba(0,0,0,.14);background:#f3ead8;}
+  .badge img{width:100%;height:100%;object-fit:cover;display:block;}
+  .pitem .badge{width:28px;height:28px;border-width:1.5px;}
+
+  /* 底部 */
+  .bot{flex:none;display:flex;align-items:center;justify-content:center;gap:16px;height:60px;padding-top:8px;}
+  .bot .cnt{font-size:16px;font-weight:800;color:#7a5a3a;}
+  .placebtn{background:#ff7a59;color:#fff;border:none;border-radius:28px;padding:11px 40px;font-size:22px;font-weight:900;
+    cursor:pointer;box-shadow:0 6px 14px rgba(255,122,89,.4);}
+  .placebtn:disabled{opacity:.45;box-shadow:none;}
+  .tip{font-size:13px;color:#a05a2a;font-weight:800;}
+
+  /* 结果页 */
+  .res{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;margin-top:8px;}
+  .rc{background:rgba(255,255,255,.8);border-radius:18px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-height:0;}
+  .rc .rh{display:flex;align-items:center;gap:8px;}
+  .rc .rh b{font-size:17px;color:#4a3826;}
+  .rc .rh .bigs{display:flex;gap:4px;flex-wrap:wrap;}
+  .rc .rh .badge{width:34px;height:34px;}
+  .rc .rb{flex:1;display:flex;gap:10px;align-items:center;min-height:0;}
+  .rc .robot svg{width:78px;height:78px;display:block;}
+  .rc .sp{flex:1;background:#fff;border-radius:14px;padding:8px 12px;box-shadow:0 2px 8px rgba(0,0,0,.1);position:relative;}
+  .rc .sp .en{font-size:17px;font-weight:900;color:#2f2a22;line-height:1.28;}
+  .rc .sp .zh{font-size:13px;color:#7a6a55;margin-top:3px;line-height:1.35;}
+  .rc .sp .ex{font-size:12px;color:#c8772a;font-weight:800;margin-top:3px;}
+  .rc .st{font-size:22px;color:#ffb400;letter-spacing:2px;margin-top:2px;}
+  .rc .st small{font-size:13px;color:#5a4632;font-weight:800;letter-spacing:0;margin-right:6px;vertical-align:3px;}
+  .rc .spkc{position:absolute;right:6px;top:6px;border:none;background:#ffe1b0;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;}
+  .rc.emptyc{align-items:center;justify-content:center;color:#b9a787;font-weight:800;font-size:15px;}
+  .tr{display:flex;gap:18px;font-size:15px;font-weight:900;color:#5a4632;}
+  .tr .s{color:#ffb400;font-size:22px;letter-spacing:2px;margin-left:5px;vertical-align:-2px;}
+  .backbtn{border:none;background:#e9dcc6;color:#5a4632;border-radius:24px;padding:10px 24px;font-size:16px;font-weight:900;cursor:pointer;}
+  .sentok{color:#1d6b2e;background:#d6f2da;border-radius:16px;padding:6px 14px;font-weight:900;font-size:15px;}
+
+  /* 提示/遮罩 */
+  #lock{position:absolute;left:0;right:0;top:0;background:#b3361f;color:#fff;text-align:center;font-weight:900;font-size:15px;
+    padding:6px;z-index:50;}
+  #hint{position:absolute;left:50%;bottom:78px;transform:translateX(-50%);background:rgba(40,30,20,.9);color:#fff;
+    padding:9px 20px;border-radius:20px;font-size:15px;font-weight:800;opacity:0;transition:.25s;pointer-events:none;z-index:80;}
+  #hint.show{opacity:1;}
+  #rotate{position:fixed;inset:0;background:#1f2a44;color:#fff;z-index:999;display:none;align-items:center;justify-content:center;
+    font-size:22px;font-weight:900;text-align:center;padding:30px;line-height:1.6;}
+  @media (orientation:portrait){ #rotate{display:flex;} }
+</style>
+</head>
+<body>
+<div id="rotate">📱↻<br>请把平板横过来使用<br>Please turn your tablet sideways.</div>
+<div id="stage">
+  <div id="lock" class="hide">🔒 老师已锁定，暂时不能修改点单 Ordering is closed.</div>
+  <div class="top">
+    <span class="gpill" id="gpill">第 1 组</span>
+    <div class="ttl">Pingyang Flavor Restaurant 平阳味道餐厅<small id="rd"></small></div>
+    <span class="net off" id="net">连接中…</span>
+  </div>
+  <div id="orderview" style="display:flex;flex-direction:column;flex:1;min-height:0">
+    <div class="plates" id="plates"></div>
+    <div class="qbar">
+      <span class="q">What would you like to eat/drink?</span>
+      <button class="spk" onclick="speak('What would you like to eat or drink?')">🔊</button>
+      <span class="sp"></span>
+      <div class="frames"><span class="f1">I'd like a / an / some …</span><span class="f2">Some …, please.</span><span class="f3">Yes, please. / No, thanks.</span></div>
+    </div>
+    <div class="menu" id="menu"></div>
+    <div class="bot">
+      <span class="cnt" id="cnt"></span>
+      <span class="tip" id="tip"></span>
+      <button class="placebtn" id="placebtn" onclick="placeOrder()">Place order 下单</button>
+    </div>
+  </div>
+  <div id="resview" style="display:none;flex-direction:column;flex:1;min-height:0">
+    <div class="res" id="res"></div>
+    <div class="bot">
+      <button class="backbtn" onclick="reopen()">← 返回修改 Edit</button>
+      <span class="sentok">✔ 订单已送到大屏 Sent!</span>
+      <span class="tr" id="tr"></span>
+    </div>
+  </div>
+  <div id="hint"></div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+const G=+new URLSearchParams(location.search).get('g')||1;
+const KEY='py_s_'+G;
+const NP=PY.PLATE_NAMES.length;
+let st={round:null,plates:Array.from({length:NP},()=>({items:[],done:false})),active:0,phase:'order',results:null};
+let srv={locked:false,ratings:{fluent:0,correct:0}};
+let first=true, dirty=false, online=false;
+try{ const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s&&s.plates&&s.plates.length===NP) st=Object.assign(st,s); }catch(e){}
+const $=id=>document.getElementById(id);
+function persist(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
+
+function fit(){ const s=Math.min(innerWidth/1024,innerHeight/768); $('stage').style.transform=`translate(-50%,-50%) scale(${s})`; }
+addEventListener('resize',fit); fit();
+
+function speak(t){ try{ if(!window.speechSynthesis) return; const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; u.rate=.9;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);}catch(e){} }
+let hintT; function hint(m){ const h=$('hint'); h.textContent=m; h.classList.add('show'); clearTimeout(hintT); hintT=setTimeout(()=>h.classList.remove('show'),1700); }
+const badge=d=>`<div class="badge"><img src="${d.img}" alt=""></div>`;
+
+/* ---------- 渲染：点单页 ---------- */
+function renderMenu(){
+  $('menu').innerHTML=PY.ZONES.map(z=>`<div class="zone"><h4>${z.label}</h4>`+
+    PY.DISHES.filter(d=>d.zone===z.key).map(d=>`<div class="dish" onclick="addDish('${d.id}')">${badge(d)}<span class="w">${d.short}</span></div>`).join('')+`</div>`).join('');
+}
+function renderPlates(){
+  $('plates').innerHTML=st.plates.map((p,i)=>{
+    const items=p.items.length?p.items.map((id,k)=>`<div class="pitem">${badge(PY.byId(id))}<button class="x" onclick="event.stopPropagation();rmItem(${i},${k})">×</button></div>`).join(''):`<div class="empty">点菜单加菜</div>`;
+    return `<div class="pc ${st.active===i?'active':''} ${p.done?'isdone':''}" onclick="setActive(${i})">
+      <div class="circle">${items}</div>
+      <div class="pinfo"><div class="who">同学 ${PY.PLATE_NAMES[i]}</div><div class="pcnt">${p.items.length}/${PY.MAX_ITEMS}</div>
+        <div class="btnrow"><button class="donebtn ${p.done?'on':''}" onclick="event.stopPropagation();toggleDone(${i})">✔ 点好了</button>
+        <button class="clrbtn" onclick="event.stopPropagation();clearPlate(${i})">清空</button></div></div></div>`;
+  }).join('');
+  const total=st.plates.reduce((s,p)=>s+p.items.length,0), ndone=st.plates.filter(p=>p.items.length&&p.done).length;
+  $('cnt').textContent=`已点 ${total} 个`;
+  const pending=st.plates.filter(p=>p.items.length&&!p.done).length;
+  $('tip').textContent= total&&pending?`还有 ${pending} 个餐盘没点“点好了”`:'';
+  $('placebtn').disabled=total===0||srv.locked;
+}
+function renderRes(){
+  $('res').innerHTML=st.plates.map((p,i)=>{
+    const r=st.results&&st.results[i];
+    if(!p.items.length||!r) return `<div class="rc emptyc">同学 ${PY.PLATE_NAMES[i]}：没有点菜</div>`;
+    return `<div class="rc"><div class="rh"><b>同学 ${PY.PLATE_NAMES[i]}</b><div class="bigs">${p.items.map(id=>badge(PY.byId(id))).join('')}</div></div>
+      <div class="rb"><div class="robot">${PY.robotSvg(r.core)}</div>
+      <div class="sp"><button class="spkc" onclick="speak(${JSON.stringify(r.en.replace(/[^\x20-\x7E]/g,'')).replace(/"/g,'&quot;')})">🔊</button>
+        <div class="en" style="padding-right:30px">${r.en}</div><div class="zh">${r.zh}</div>${r.ex?`<div class="ex">${r.ex}</div>`:''}
+        <div class="st"><small>Healthy plate</small>${'★'.repeat(r.core)}${'☆'.repeat(5-r.core)}</div></div></div></div>`;
+  }).join('');
+  const rt=srv.ratings, S=n=>'★'.repeat(n)+'☆'.repeat(3-n);
+  $('tr').innerHTML=(rt.fluent||rt.correct)?`<span>Fluent dialogue <span class="s">${S(rt.fluent)}</span></span><span>Correct expression <span class="s">${S(rt.correct)}</span></span>`:'';
+}
+function render(){
+  $('gpill').textContent=`第 ${G} 组`;
+  $('rd').textContent=st.round?`Round ${st.round}`:'';
+  $('lock').classList.toggle('hide',!srv.locked);
+  const res=st.phase==='result';
+  $('orderview').style.display=res?'none':'flex'; $('resview').style.display=res?'flex':'none';
+  if(res) renderRes(); else renderPlates();
+}
+
+/* ---------- 操作 ---------- */
+function touched(){ persist(); dirty=true; scheduleDraft(); renderPlates(); }
+function addDish(id){
+  if(srv.locked){ hint('老师已锁定 Ordering is closed.'); return; }
+  const p=st.plates[st.active];
+  if(p.items.length>=PY.MAX_ITEMS){ hint("That's a lot! 一个餐盘最多 6 个"); return; }
+  p.items.push(id); p.done=false; touched();
+}
+function rmItem(i,k){ if(srv.locked) return; st.plates[i].items.splice(k,1); st.plates[i].done=false; touched(); }
+function setActive(i){ st.active=i; persist(); renderPlates(); }
+function clearPlate(i){ if(srv.locked) return; st.plates[i]={items:[],done:false}; touched(); }
+function toggleDone(i){
+  if(srv.locked) return;
+  const p=st.plates[i]; if(!p.items.length){ hint('先点菜再按“点好了”'); return; }
+  p.done=!p.done;
+  if(p.done){ /* 点好了 → 自动切到下一个还没点好的餐盘 */
+    for(let k=1;k<=NP;k++){ const j=(i+k)%NP; if(!st.plates[j].done){ st.active=j; hint(`轮到同学 ${PY.PLATE_NAMES[j]} 点餐啦！`); break; } }
+  }
+  touched();
+}
+
+/* ---------- 与服务器同步 ---------- */
+let draftT=null;
+function scheduleDraft(){ clearTimeout(draftT); draftT=setTimeout(sendDraft,250); }
+async function post(url,body){
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  return {status:r.status,data:await r.json().catch(()=>({}))};
+}
+async function sendDraft(reopen){
+  try{ const r=await post('/api/draft',{g:G,plates:st.plates,reopen:!!reopen});
+    if(r.status===200) dirty=false; else if(r.status===423){ dirty=false; } else throw 0;
+  }catch(e){ dirty=true; clearTimeout(draftT); draftT=setTimeout(sendDraft,2000); }
+}
+async function placeOrder(){
+  if(srv.locked){ hint('老师已锁定 Ordering is closed.'); return; }
+  const total=st.plates.reduce((s,p)=>s+p.items.length,0); if(!total){ hint('Please order something first.'); return; }
+  $('placebtn').disabled=true;
+  try{
+    const r=await post('/api/submit',{g:G,plates:st.plates});
+    if(r.status===200){ st.results=r.data.results; st.phase='result'; dirty=false; persist(); render(); }
+    else { hint(r.status===423?'老师已锁定':'提交失败，请再试一次'); }
+  }catch(e){ hint('网络不通，请检查 Wi-Fi 后再点一次'); }
+  renderPlates();
+}
+function reopen(){ if(srv.locked){ hint('老师已锁定 Ordering is closed.'); return; }
+  st.phase='order'; persist(); sendDraft(true); render(); }
+
+function hasItems(plates){ return plates.some(p=>p.items.length); }
+function onState(m){
+  srv.locked=m.locked;
+  const g=m.group; srv.ratings=g.ratings||{fluent:0,correct:0};
+  if(st.round!==null && st.round!==m.round){      /* 老师开了新一轮：清空 */
+    st={round:m.round,plates:Array.from({length:NP},()=>({items:[],done:false})),active:0,phase:'order',results:null};
+  } else if(first){
+    st.round=m.round;
+    if(g.submitted){ st.plates=g.plates; st.results=g.results; st.phase='result'; }
+    else if(hasItems(g.plates)){ st.plates=g.plates; if(st.phase==='result') st.phase='order'; }
+    else if(hasItems(st.plates)){ sendDraft(); }
+  } else {
+    st.round=m.round;
+    if(st.phase==='result' && !g.submitted){ st.phase='order'; }          // 老师重置了本组
+    if(!g.updatedAt && hasItems(st.plates) && !dirty){ st.plates=Array.from({length:NP},()=>({items:[],done:false})); st.results=null; }
+    if(st.phase==='result' && g.results) st.results=g.results;
+  }
+  first=false; persist(); render();
+}
+function connect(){
+  const es=new EventSource('/events?role=student&g='+G);
+  es.onopen=()=>{ online=true; $('net').textContent='● 已连接'; $('net').classList.remove('off'); if(dirty) sendDraft(); };
+  es.onmessage=e=>{ try{ onState(JSON.parse(e.data)); }catch(x){} };
+  es.onerror=()=>{ online=false; $('net').textContent='● 断开，自动重连…'; $('net').classList.add('off'); };
+}
+renderMenu(); render(); connect();
+</script>
+</body>
+</html>

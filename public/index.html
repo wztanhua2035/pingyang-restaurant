@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>平阳味道餐厅</title>
+<style>
+ body{margin:0;background:#f5ecd8;font-family:"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;color:#3a2c1c;padding:28px 20px;text-align:center}
+ h1{font-size:30px;margin:6px 0 4px} p{color:#7a6a55;margin:0 0 22px}
+ .g{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px;max-width:760px;margin:0 auto 26px}
+ a{display:block;text-decoration:none;font-weight:900;border-radius:16px;padding:18px 0;font-size:20px}
+ .s{background:#fff;color:#ff7a59;box-shadow:0 3px 8px rgba(0,0,0,.12)} .w{display:inline-block;background:#2faa4a;color:#fff;padding:14px 34px}
+</style></head><body>
+<h1>🍜 平阳味道餐厅</h1><p>Pingyang Flavor Restaurant · 学生请选择本组组号 / Choose your group</p>
+<div class="g" id="g"></div>
+<a class="w" href="wall.html">🏆 老师：打开大屏订单墙</a>
+<script>
+fetch('/api/info').then(r=>r.json()).then(i=>{document.getElementById('g').innerHTML=Array.from({length:i.groups},(_,k)=>`<a class="s" href="s.html?g=${k+1}">第 ${k+1} 组</a>`).join('')})
+.catch(()=>{document.getElementById('g').innerHTML=Array.from({length:10},(_,k)=>`<a class="s" href="s.html?g=${k+1}">第 ${k+1} 组</a>`).join('')});
+</script></body></html>
