@@ -31,7 +31,7 @@ node server.js          # 需要 Node.js 18+，无需 npm install
    > 如果服务器访问 GitHub 很慢，可改用 Gitee 镜像或把代码打包上传。
 2. **一键安装**：`cd /opt/pingyang-restaurant && DOMAIN=你的子域名 bash deploy/install.sh`
 3. 域名解析：在 DNS 里给该子域名加一条 **A 记录** 指向服务器公网 IP。腾讯云安全组放行 **80（和 443）** 端口。
-4. 之后更新：`bash /opt/pingyang-restaurant/deploy/update.sh`
+4. 之后更新：`bash /opt/pingyang-restaurant/deploy/update.sh`（普通账号运行即可）
 
 ## 上课流程
 1. 课前打开大屏 `/wall.html` → 右上角「教师登录」输入密码 → 「二维码」把 10 个二维码投出来或打印。
