@@ -159,6 +159,15 @@ const server = http.createServer((req, res) => {
     broadcast(); json(res, 200, { ok: true });
   });
 
+  /* 学生自评：本组下单后，学生可以给「对话流利 / 表达正确」打 1~3 星（老师在大屏上也能改） */
+  if (req.method === 'POST' && p === '/api/rate') return readJson(req, res, b => {
+    if (!validG(b.g) || !['fluent', 'correct'].includes(b.key)) return json(res, 400, { error: 'bad args' });
+    const G = state.groups[b.g];
+    if (!G.submitted) return json(res, 409, { error: 'not submitted' });
+    G.ratings[b.key] = Math.max(0, Math.min(3, Math.round(+b.val || 0)));
+    broadcast(); json(res, 200, { ok: true, ratings: G.ratings });
+  });
+
   if (req.method === 'GET' && p === '/api/info') return json(res, 200, { groups: GROUPS, round: state.round });
 
   if (req.method === 'GET' || req.method === 'HEAD') return serveStatic(req, res, p);

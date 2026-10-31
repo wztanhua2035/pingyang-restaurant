@@ -167,7 +167,8 @@ const DISHES=[
 ];
 const ZONES=[{key:'staple',label:'Staple 主食'},{key:'meat',label:'Meat 肉'},{key:'veg',label:'Vegetables & Fruit 蔬果'},{key:'drink',label:'Drinks 汤饮'},{key:'dessert',label:'Dessert 甜点'}];
 const byId=id=>DISHES.find(d=>d.id===id);
-const PLATE_NAMES=['A','B','C','D'];   // 每组 4 位同学
+const PLATE_NAMES=['1','2','3','4'];   // 每组 4 个餐盘
+const plateNo=(g,i)=>(g-1)*PLATE_NAMES.length+i+1;   // 全班唯一编号：第1组=1~4，第2组=5~8 …
 const MAX_ITEMS=6;                      // 每个餐盘最多 6 个
 
 function buildFeedback(items){
@@ -246,6 +247,6 @@ function robotSvg(stars){
 }
 
 
-const PY={DISHES,ZONES,byId,PLATE_NAMES,MAX_ITEMS,buildFeedback,robotSvg};
+const PY={DISHES,ZONES,byId,PLATE_NAMES,plateNo,MAX_ITEMS,buildFeedback,robotSvg};
 if(typeof module!=='undefined'&&module.exports) module.exports=PY; else root.PY=PY;
 })(typeof window!=='undefined'?window:globalThis);

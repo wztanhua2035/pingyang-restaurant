@@ -35,7 +35,8 @@
   .pitem .x{position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;background:#ff5a4d;
     color:#fff;border:none;font-weight:900;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
   .pinfo{display:flex;flex-direction:column;gap:5px;min-width:0;}
-  .who{font-weight:900;font-size:16px;color:#4a3826;white-space:nowrap;}
+  .who{font-weight:900;font-size:17px;color:#4a3826;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+  .no{display:inline-block;min-width:34px;text-align:center;background:#ff7a59;color:#fff;border-radius:18px;padding:1px 9px;font-size:22px;line-height:1.25;}
   .pcnt{font-size:12.5px;color:#8a6a4a;font-weight:700;}
   .donebtn,.clrbtn{border:none;border-radius:14px;padding:5px 10px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;}
   .donebtn{background:#bfe9c4;color:#1d6b2e;} .donebtn.on{background:#2faa4a;color:#fff;}
@@ -93,6 +94,13 @@
   .rc.emptyc{align-items:center;justify-content:center;color:#b9a787;font-weight:800;font-size:15px;}
   .tr{display:flex;gap:18px;font-size:15px;font-weight:900;color:#5a4632;}
   .tr .s{color:#ffb400;font-size:22px;letter-spacing:2px;margin-left:5px;vertical-align:-2px;}
+  .rate{flex:none;display:flex;align-items:center;gap:18px;background:#fff;border-radius:16px;padding:6px 18px;margin-top:8px;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+  .rate .rl{font-size:15px;font-weight:900;color:#7a5a3a;}
+  .rate .ri{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:900;color:#3a2c1c;}
+  .rate .ri small{display:block;font-size:12px;color:#8a6a4a;font-weight:800;}
+  .rate .ss{display:flex;}
+  .rate .ss i{font-style:normal;font-size:38px;line-height:1;color:#d4d0c4;padding:0 3px;cursor:pointer;}
+  .rate .ss i.on{color:#ffb400;}
   .backbtn{border:none;background:#e9dcc6;color:#5a4632;border-radius:24px;padding:10px 24px;font-size:16px;font-weight:900;cursor:pointer;}
   .sentok{color:#1d6b2e;background:#d6f2da;border-radius:16px;padding:6px 14px;font-weight:900;font-size:15px;}
 
@@ -133,10 +141,10 @@
   </div>
   <div id="resview" style="display:none;flex-direction:column;flex:1;min-height:0">
     <div class="res" id="res"></div>
+    <div class="rate" id="rate"></div>
     <div class="bot">
       <button class="backbtn" onclick="reopen()">← 返回修改 Edit</button>
       <span class="sentok">✔ 订单已送到大屏 Sent!</span>
-      <span class="tr" id="tr"></span>
     </div>
   </div>
   <div id="hint"></div>
@@ -172,7 +180,7 @@ function renderPlates(){
     const items=p.items.length?p.items.map((id,k)=>`<div class="pitem">${badge(PY.byId(id))}<button class="x" onclick="event.stopPropagation();rmItem(${i},${k})">×</button></div>`).join(''):`<div class="empty">点菜单加菜</div>`;
     return `<div class="pc ${st.active===i?'active':''} ${p.done?'isdone':''}" onclick="setActive(${i})">
       <div class="circle">${items}</div>
-      <div class="pinfo"><div class="who">同学 ${PY.PLATE_NAMES[i]}</div><div class="pcnt">${p.items.length}/${PY.MAX_ITEMS}</div>
+      <div class="pinfo"><div class="who"><span class="no">${PY.plateNo(G,i)}</span>号</div><div class="pcnt">${p.items.length}/${PY.MAX_ITEMS}</div>
         <div class="btnrow"><button class="donebtn ${p.done?'on':''}" onclick="event.stopPropagation();toggleDone(${i})">✔ 点好了</button>
         <button class="clrbtn" onclick="event.stopPropagation();clearPlate(${i})">清空</button></div></div></div>`;
   }).join('');
@@ -185,15 +193,17 @@ function renderPlates(){
 function renderRes(){
   $('res').innerHTML=st.plates.map((p,i)=>{
     const r=st.results&&st.results[i];
-    if(!p.items.length||!r) return `<div class="rc emptyc">同学 ${PY.PLATE_NAMES[i]}：没有点菜</div>`;
-    return `<div class="rc"><div class="rh"><b>同学 ${PY.PLATE_NAMES[i]}</b><div class="bigs">${p.items.map(id=>badge(PY.byId(id))).join('')}</div></div>
+    if(!p.items.length||!r) return `<div class="rc emptyc">${PY.plateNo(G,i)} 号：没有点菜</div>`;
+    return `<div class="rc"><div class="rh"><span class="no">${PY.plateNo(G,i)}</span><b>号</b><div class="bigs">${p.items.map(id=>badge(PY.byId(id))).join('')}</div></div>
       <div class="rb"><div class="robot">${PY.robotSvg(r.core)}</div>
       <div class="sp"><button class="spkc" onclick="speak(${JSON.stringify(r.en.replace(/[^\x20-\x7E]/g,'')).replace(/"/g,'&quot;')})">🔊</button>
         <div class="en" style="padding-right:30px">${r.en}</div><div class="zh">${r.zh}</div>${r.ex?`<div class="ex">${r.ex}</div>`:''}
         <div class="st"><small>Healthy plate</small>${'★'.repeat(r.core)}${'☆'.repeat(5-r.core)}</div></div></div></div>`;
   }).join('');
-  const rt=srv.ratings, S=n=>'★'.repeat(n)+'☆'.repeat(3-n);
-  $('tr').innerHTML=(rt.fluent||rt.correct)?`<span>Fluent dialogue <span class="s">${S(rt.fluent)}</span></span><span>Correct expression <span class="s">${S(rt.correct)}</span></span>`:'';
+  const rt=srv.ratings, star=(key)=>[1,2,3].map(k=>`<i class="${rt[key]>=k?'on':''}" onclick="setRate('${key}',${k})">★</i>`).join('');
+  $('rate').innerHTML=`<span class="rl">给你们小组打分<br>Rate your group</span>
+    <div class="ri"><div>Fluent dialogue<small>对话流利</small></div><div class="ss">${star('fluent')}</div></div>
+    <div class="ri"><div>Correct expression<small>表达正确</small></div><div class="ss">${star('correct')}</div></div>`;
 }
 function render(){
   $('gpill').textContent=`第 ${G} 组`;
@@ -220,7 +230,7 @@ function toggleDone(i){
   const p=st.plates[i]; if(!p.items.length){ hint('先点菜再按“点好了”'); return; }
   p.done=!p.done;
   if(p.done){ /* 点好了 → 自动切到下一个还没点好的餐盘 */
-    for(let k=1;k<=NP;k++){ const j=(i+k)%NP; if(!st.plates[j].done){ st.active=j; hint(`轮到同学 ${PY.PLATE_NAMES[j]} 点餐啦！`); break; } }
+    for(let k=1;k<=NP;k++){ const j=(i+k)%NP; if(!st.plates[j].done){ st.active=j; hint(`轮到 ${PY.plateNo(G,j)} 号点餐啦！`); break; } }
   }
   touched();
 }
@@ -247,6 +257,11 @@ async function placeOrder(){
     else { hint(r.status===423?'老师已锁定':'提交失败，请再试一次'); }
   }catch(e){ hint('网络不通，请检查 Wi-Fi 后再点一次'); }
   renderPlates();
+}
+async function setRate(key,k){
+  const v=srv.ratings[key]===k?0:k;           // 再点一次同一颗星 = 取消
+  srv.ratings[key]=v; renderRes();
+  try{ await post('/api/rate',{g:G,key,val:v}); }catch(e){ hint('网络不通，评分没有送出，请再点一次'); }
 }
 function reopen(){ if(srv.locked){ hint('老师已锁定 Ordering is closed.'); return; }
   st.phase='order'; persist(); sendDraft(true); render(); }
