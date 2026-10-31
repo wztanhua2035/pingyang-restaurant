@@ -69,14 +69,13 @@
 <div id="stage">
   <div class="head">
     <h1>🏆 Order Wall · 订单墙</h1>
-    <span class="rpill" id="rd">Round 1</span>
     <span class="prog" id="prog">已下单 0/10</span>
     <span class="lockpill hide" id="lockpill" style="display:none">🔒 已锁定</span>
     <span class="sp"></span>
     <span class="net off" id="net">● 连接中…</span>
     <button class="tb" onclick="showQR()">📱 二维码</button>
     <button class="tb" id="lockbtn" onclick="toggleLock()">🔒 锁定点单</button>
-    <button class="tb warn" onclick="newRound()">▶ 下一轮</button>
+    <button class="tb warn" onclick="clearAll()">🗑 清空</button>
     <button class="tb" id="authbtn" onclick="openLogin()">🔑 教师登录</button>
   </div>
   <div class="grid" id="grid"></div>
@@ -86,7 +85,7 @@
       <div class="row"><button class="tb" onclick="window.print()">🖨 打印</button><button class="tb pri" onclick="$('ovqr').classList.remove('show')">关闭</button></div></div>
   </div>
   <div class="ov" id="ovlogin">
-    <div class="box"><h2>🔑 教师登录</h2><div style="color:#7a6a55;font-size:14px">服务器设置了教师密码，登录后才能打分、锁定、开始下一轮。</div>
+    <div class="box"><h2>🔑 教师登录</h2><div style="color:#7a6a55;font-size:14px">服务器设置了教师密码，登录后才能打分、锁定、清空。</div>
       <input id="pw" type="password" placeholder="教师密码" onkeydown="if(event.key==='Enter')doLogin()">
       <div class="row"><button class="tb" onclick="$('ovlogin').classList.remove('show')">取消</button><button class="tb pri" onclick="doLogin()">登录</button></div></div>
   </div>
@@ -108,7 +107,6 @@ function stars5(n){ return '★'.repeat(n)+'☆'.repeat(5-n); }
 function render(){
   if(!S) return;
   const n=S.n, ids=Array.from({length:n},(_,i)=>i+1);
-  $('rd').textContent='Round '+S.round;
   const sub=ids.filter(g=>S.groups[g].submitted).length;
   $('prog').textContent=`已下单 ${sub}/${n}`;
   $('lockpill').style.display=S.locked?'':'none';
@@ -160,7 +158,7 @@ async function doLogin(){
 async function needAuth(fn){ if(!authed){ openLogin('请先登录教师账号'); return; } await fn(); }
 function rate(g,key,k,cur){ needAuth(()=>adm('rate',{g,key,val:cur===k?0:k})); }
 function toggleLock(){ needAuth(()=>adm(S.locked?'unlock':'lock')); }
-function newRound(){ needAuth(async()=>{ if(confirm('开始下一轮？所有组的点单和评分都会清空。')) { if(await adm('newRound')) toast('已开始新一轮'); } }); }
+function clearAll(){ needAuth(async()=>{ if(confirm('清空所有组的点单和评分记录？此操作不能撤销。')) { if(await adm('newRound')) toast('已清空，可以重新开始'); } }); }
 function showQR(){
   const n=S?S.n:10, base=location.origin;
   $('qrs').innerHTML=Array.from({length:n},(_,i)=>{ const u=`${base}/s.html?g=${i+1}`;

@@ -207,7 +207,6 @@ function renderRes(){
 }
 function render(){
   $('gpill').textContent=`第 ${G} 组`;
-  $('rd').textContent=st.round?`Round ${st.round}`:'';
   $('lock').classList.toggle('hide',!srv.locked);
   const res=st.phase==='result';
   $('orderview').style.display=res?'none':'flex'; $('resview').style.display=res?'flex':'none';
